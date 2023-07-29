@@ -20,13 +20,35 @@
 // here, we say that we want to use all the functions / classes / etc
 // from the std namespace as if they were in the global namespace
 using namespace std;
+// (imaginary definition of cout and endl and iostream)
 
+// this is would be what you'd do in a header file
+// that way it doesn't bring the full namespace
+// into any file that includes the header file
+using std::cout;
+using std::endl;
+
+// inaccessible namespace
+// since there's no name that you can use
+// to access all the functions/variables w/i the namespace
+namespace
+{
+    string secretSauce = "secret!!";
+};
 // namespaces are declared with the keyword `namespace`. Their contents
 // goes in the following brackets (which should be ended with a semicolon)
 // this namespace contains multiple fibonacci functions, each
 // with a different implementation
 namespace fibonacci
 {
+    // nested namespace
+    namespace fibonacciprivate
+    {
+        // cache that stores fibonacci numbers;
+        // this isn't actually a global variable, rather, it
+        // is a variable that exists inside the `fibonacci` namespace
+        unordered_map<int, int> fibonacciCache;
+    }
     // basic recursive fibonacci
     int fibonacciRecursive(int n)
     {
@@ -41,20 +63,15 @@ namespace fibonacci
         return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
     }
 
-    // cache that stores fibonacci numbers;
-    // this isn't actually a global variable, rather, it
-    // is a variable that exists inside the `fibonacci` namespace
-    unordered_map<int, int> fibonacciCache;
-
     // fibonacci, but it
     // uses the cache to calculate fibonacci numbers
     int fibonacciCached(int n)
     {
         // if n already is within the cache, just
         // return that value
-        if (fibonacciCache.find(n) != fibonacciCache.end())
+        if (fibonacciprivate::fibonacciCache.find(n) != fibonacciprivate::fibonacciCache.end())
         {
-            return fibonacciCache[n];
+            return fibonacciprivate::fibonacciCache[n];
         }
 
         int ret = 0;
@@ -73,7 +90,7 @@ namespace fibonacci
         }
 
         // store the calculated value
-        fibonacciCache[n] = ret;
+        fibonacciprivate::fibonacciCache[n] = ret;
         return ret;
     }
 
@@ -84,15 +101,14 @@ int main()
     int times = 35;
 
     // :: is used to specify that we are referring to a member of the namespace
+    // equivalent to doing numpy.array
+    // namespace::variable / function
     cout << fibonacci::fibonacciRecursive(times) << endl;
 
     // using directives can go within functions too!!
     // here, we say we want to use fibonacci's fibonacciCached as if it was "in the global namespace"
     using fibonacci::fibonacciCached;
     cout << fibonacciCached(times) << endl;
-
-    // we can also access variables this way
-    cout << fibonacci::fibonacciCache[0] << endl;
 
     // std::cout and std::endl are what we are really
     // using above, but because we used the `using` directive,
@@ -103,7 +119,7 @@ int main()
     // if it wasn't defined at all --- because, for the compiler, it is undefined since
     // the compiler doesn't know where that function comes from
     // try it:
-    // cout << fibonacciRecursive(times) << endl;  // compiler error
+    // cout << fibonacciRecursive(times) << endl; // compiler error
 
     return 0;
 }
